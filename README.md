@@ -70,24 +70,27 @@ Alternatively the OpenJDK build of JDK 19 can be downloaded here:
 
     https://jdk.java.net/jextract/
 
+Ensure that the jextract `bin` directory is added to the executable path, but be 
+careful to ensure the executable path of JDK 19 takes precedence.
+
 ### Generate Java binding to the BLIS native library
 
-From the `bindings` direction run the script:
+From the `bindings` directory run the script:
 
     generate-panama-blis-binding.sh
 
 This script will run the jextract tool generating Java bindings from the `blis.h` 
 header file.
 
-From the `bindings` direction run the script:
+From the `bindings` directory run the script:
 
     generate-panama-blis-binding-source.sh
 
 This script will run the jextract tool generating the source for Java bindings from the 
 `blis.h` header file.
 
-Each scripts will install an artifact in the local maven repository, the jar and 
-source artefacts. The `pom.xml` of the project contains a dependency on jar artefact:
+Each script will install an artifact in the local maven repository, the jar and 
+source artifacts. The `pom.xml` of the project contains a dependency on jar artifact:
 ```xml
 <dependency>
     <groupId>oracle.blis.matrix</groupId>
