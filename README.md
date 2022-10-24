@@ -54,8 +54,6 @@ Set the environment variable `BLIS_ARCH` to be the target architecture. There by
 
 ### Download JDK 19 
 
-JDK 19 can be downloaded from here:
-
 The Oracle builds of JDK 19 can be downloaded here:
 
     https://www.oracle.com/java/technologies/downloads/
