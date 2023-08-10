@@ -140,8 +140,7 @@ public final class DoubleMatrix extends Matrix<Double> {
         if (a.isZeroOffset() && b.isZeroOffset() && r.isZeroOffset() &&
                 o instanceof DoubleBroadcastKernel.BinaryBinaryBroadcastKernel k) {
             k.binaryBroadcastMatrix(a.buffer, b.buffer, r.buffer, a.rows * a.columns);
-        }
-        else {
+        } else {
             for (long j = 0; j < a.columns; j++) {
                 for (long i = 0; i < a.rows; i++) {
                     long aIndex = a.linearIndex(i, j);
@@ -202,8 +201,7 @@ public final class DoubleMatrix extends Matrix<Double> {
                 b.columnStride == 1 &&
                 o instanceof DoubleBroadcastKernel.BinaryBinaryBroadcastKernel k) {
             k.binaryBroadcastVector(a.buffer, b.buffer, r.buffer, a.columnStride, b.columns);
-        }
-        else {
+        } else {
             for (long j = 0; j < a.columns; j++) {
                 long bIndex = b.linearIndex(0, j);
                 double bE = b.buffer.getAtIndex(ValueLayout.JAVA_DOUBLE, bIndex);
@@ -240,8 +238,7 @@ public final class DoubleMatrix extends Matrix<Double> {
                 o instanceof DoubleBroadcastKernel.BinaryBinaryBroadcastKernel k) {
             assert a.rowStride == b.rows;
             k.binaryBroadcastVector(a.buffer, b.buffer, r.buffer, a.rowStride, b.rows);
-        }
-        else {
+        } else {
             for (long i = 0; i < a.rows; i++) {
                 long bIndex = b.linearIndex(i, 0);
                 double bE = b.buffer.getAtIndex(ValueLayout.JAVA_DOUBLE, bIndex);
@@ -317,8 +314,7 @@ public final class DoubleMatrix extends Matrix<Double> {
         if (a.isZeroOffset() && b.isZeroOffset() && c.isZeroOffset() && r.isZeroOffset() &&
                 o instanceof DoubleBroadcastKernel.TernaryBroadcastKernel k) {
             k.binaryBroadcastMatrix(a.buffer, b.buffer, c.buffer, r.buffer, a.rows * a.columns);
-        }
-        else {
+        } else {
             for (long j = 0; j < a.columns; j++) {
                 for (long i = 0; i < a.rows; i++) {
                     long aIndex = a.linearIndex(i, j);
@@ -381,8 +377,7 @@ public final class DoubleMatrix extends Matrix<Double> {
                 b.columnStride == 1 &&
                 o instanceof DoubleBroadcastKernel.TernaryBroadcastKernel k) {
             k.binaryBroadcastVector(a.buffer, b.buffer, c.buffer, r.buffer, a.columnStride, b.columns);
-        }
-        else {
+        } else {
             for (long j = 0; j < a.columns; j++) {
                 long bIndex = b.linearIndex(0, j);
                 double bE = b.buffer.getAtIndex(ValueLayout.JAVA_DOUBLE, bIndex);
@@ -421,8 +416,7 @@ public final class DoubleMatrix extends Matrix<Double> {
                 o instanceof DoubleBroadcastKernel.TernaryBroadcastKernel k) {
             assert a.rowStride == b.rows;
             k.binaryBroadcastVector(a.buffer, b.buffer, c.buffer, r.buffer, a.rowStride, b.rows);
-        }
-        else {
+        } else {
             for (long i = 0; i < a.rows; i++) {
                 long bIndex = b.linearIndex(i, 0);
                 double bE = b.buffer.getAtIndex(ValueLayout.JAVA_DOUBLE, bIndex);
@@ -455,8 +449,7 @@ public final class DoubleMatrix extends Matrix<Double> {
                 columnStride == 1 &&
                 o instanceof DoubleBroadcastKernel.ReductionBroadcastKernel k) {
             k.reduceBroadcastVector(buffer, r.buffer, rowStride, result.rows);
-        }
-        else {
+        } else {
             for (long i = 0; i < rows; i++) {
                 double acc = 0.0;
                 for (long j = 0; j < columns; j++) {
@@ -480,8 +473,7 @@ public final class DoubleMatrix extends Matrix<Double> {
                 rowStride == 1 &&
                 o instanceof DoubleBroadcastKernel.ReductionBroadcastKernel k) {
             k.reduceBroadcastVector(buffer, r.buffer, columnStride, result.columns);
-        }
-        else {
+        } else {
             for (long j = 0; j < columns; j++) {
                 double acc = 0.0;
                 for (long i = 0; i < rows; i++) {
@@ -532,8 +524,7 @@ public final class DoubleMatrix extends Matrix<Double> {
         if (isZeroOffset()
                 && o instanceof DoubleBroadcastKernel.ReductionBroadcastKernel k) {
             return k.reduceBroadcastScalar(buffer, 0, rows * columns);
-        }
-        else {
+        } else {
             double acc = 0.0;
             for (long j = 0; j < columns; j++) {
                 for (long i = 0; i < rows; i++) {
@@ -606,6 +597,21 @@ public final class DoubleMatrix extends Matrix<Double> {
 
         // @@@ TODO implement in Java?
         blis_h.bli_copym(obj, cast(r).obj);
+    }
+
+    @Override
+    public void copyRowInto(int srcRow, Matrix<Double> r, int dstRow) {
+        DoubleMatrix result = cast(r);
+
+        if (columns != r.columns) {
+            throw new IllegalArgumentException();
+        }
+        Objects.checkIndex(srcRow, rows);
+        Objects.checkIndex(dstRow, r.rows);
+
+        for (int j = 0; j < columns; j++) {
+            result.set(dstRow, j, get(srcRow, j));
+        }
     }
 
     public void extractColumnInto(int column, double[] r, int offset) {

@@ -26,22 +26,22 @@ package oracle.blis.matrix;
 import oracle.blis.matrix.binding.obj_t;
 import org.junit.Test;
 
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 
 import static oracle.blis.matrix.binding.blis_h.*;
 
 public class TestApi {
     @Test
     public void testUsingBinding() {
-        try (MemorySession s = MemorySession.openConfined()) {
+        try (Arena sa = Arena.openConfined()) {
             /* num_t  */ int dt;
             /* dim_t  */ long m, n, k;
             /* inc_t  */ long rs, cs;
 
-            /* obj_t* */ MemorySegment a = obj_t.allocate(s);
-            /* obj_t* */ MemorySegment b = obj_t.allocate(s);
-            /* obj_t* */ MemorySegment c = obj_t.allocate(s);
+            /* obj_t* */ MemorySegment a = obj_t.allocate(sa);
+            /* obj_t* */ MemorySegment b = obj_t.allocate(sa);
+            /* obj_t* */ MemorySegment c = obj_t.allocate(sa);
             /* obj_t* */ MemorySegment alpha;
             /* obj_t* */ MemorySegment beta;
 
@@ -62,18 +62,18 @@ public class TestApi {
             bli_setm(BLIS_ONE$SEGMENT(), b);
             bli_setm(BLIS_ZERO$SEGMENT(), c);
 
-            bli_printm(s.allocateUtf8String("a: randomized"), a,
-                    s.allocateUtf8String("%5.2f"), s.allocateUtf8String(""));
-            bli_printm(s.allocateUtf8String("b: set to 1.0"), b,
-                    s.allocateUtf8String("%5.2f"), s.allocateUtf8String(""));
-            bli_printm(s.allocateUtf8String("c: initial value"), c,
-                    s.allocateUtf8String("%5.2f"), s.allocateUtf8String(""));
+            bli_printm(sa.allocateUtf8String("a: randomized"), a,
+                    sa.allocateUtf8String("%5.2f"), sa.allocateUtf8String(""));
+            bli_printm(sa.allocateUtf8String("b: set to 1.0"), b,
+                    sa.allocateUtf8String("%5.2f"), sa.allocateUtf8String(""));
+            bli_printm(sa.allocateUtf8String("c: initial value"), c,
+                    sa.allocateUtf8String("%5.2f"), sa.allocateUtf8String(""));
 
             // c := beta * c + alpha * a * b, where 'a', 'b', and 'c' are general.
             bli_gemm(alpha, a, b, beta, c);
 
-            bli_printm(s.allocateUtf8String("c: after gemm"), c,
-                    s.allocateUtf8String("%5.2f"), s.allocateUtf8String(""));
+            bli_printm(sa.allocateUtf8String("c: after gemm"), c,
+                    sa.allocateUtf8String("%5.2f"), sa.allocateUtf8String(""));
 
             // Free the objects.
             bli_obj_free(a);
@@ -86,14 +86,14 @@ public class TestApi {
 
     @Test
     public void testUsingMatrix() {
-        try (MemorySession s = MemorySession.openConfined()) {
+        try (Arena sa = Arena.openConfined()) {
             /* dim_t  */ long m, n, k;
 
             // Create some matrix operands to work with.
             m = 4; n = 5; k = 3;
-            DoubleMatrix c = Matrix.newDoubleMatrix(s, m, n);
-            DoubleMatrix a = Matrix.newDoubleMatrix(s, m, k);
-            DoubleMatrix b = Matrix.newDoubleMatrix(s, k, n);
+            DoubleMatrix c = Matrix.newDoubleMatrix(sa, m, n);
+            DoubleMatrix a = Matrix.newDoubleMatrix(sa, m, k);
+            DoubleMatrix b = Matrix.newDoubleMatrix(sa, k, n);
 
             // Set the scalars to use.
             Matrix<?> alpha = Matrix.one();

@@ -26,10 +26,11 @@ package oracle.blis.matrix;
 import oracle.blis.matrix.binding.blis_h;
 import oracle.blis.matrix.binding.obj_t;
 
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 import java.lang.foreign.SegmentAllocator;
+import java.lang.foreign.SegmentScope;
 import java.lang.foreign.ValueLayout;
 
 public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicConstant {
@@ -113,6 +114,8 @@ public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicC
 
     public abstract void copyInto(Matrix<T> dest);
 
+    public abstract void copyRowInto(int srcRow, Matrix<Double> r, int dstRow);
+
     public abstract void transpose(Matrix<T> b);
 
     public abstract Matrix<T> transpose();
@@ -128,10 +131,10 @@ public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicC
     }
 
     public void print(String m) {
-        try (var scope = MemorySession.openConfined()) {
-            var message = scope.allocateUtf8String(m);
-            var emptyString = scope.allocateUtf8String("");
-            var format = scope.allocateUtf8String("%5.2f");
+        try (var sa = Arena.openConfined()) {
+            var message = sa.allocateUtf8String(m);
+            var emptyString = sa.allocateUtf8String("");
+            var format = sa.allocateUtf8String("%5.2f");
             blis_h.bli_printm(message, obj, format, emptyString);
         }
     }
@@ -366,6 +369,11 @@ public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicC
         }
 
         @Override
+        public void copyRowInto(int srcRow, Matrix<Double> r, int dstRow) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public void transpose(Matrix<Object> b) {
             throw new UnsupportedOperationException();
         }
@@ -389,9 +397,9 @@ public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicC
     }
 
     private static final class Constants {
-        static final Matrix<?> ZERO = new Matrix.PolymorphicConstant(blis_h.BLIS_ZERO$SEGMENT());
-        static final Matrix<?> ONE = new Matrix.PolymorphicConstant(blis_h.BLIS_ONE$SEGMENT());
-        static final Matrix<?> TWO = new Matrix.PolymorphicConstant(blis_h.BLIS_TWO$SEGMENT());
+        static final Matrix<?> ZERO = new PolymorphicConstant(blis_h.BLIS_ZERO$SEGMENT());
+        static final Matrix<?> ONE = new PolymorphicConstant(blis_h.BLIS_ONE$SEGMENT());
+        static final Matrix<?> TWO = new PolymorphicConstant(blis_h.BLIS_TWO$SEGMENT());
     }
 
     public static Matrix<?> zero() {
@@ -407,20 +415,20 @@ public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicC
     }
 
     public static DoubleMatrix newDoubleMatrix(long rows, long columns) {
-        return newDoubleMatrix(MemorySession.openImplicit(), rows, columns);
+        return newDoubleMatrix(SegmentAllocator.nativeAllocator(SegmentScope.auto()), rows, columns);
     }
 
-    public static DoubleMatrix newDoubleMatrix(MemorySession scope, long rows, long columns) {
-        return newDoubleMatrix((SegmentAllocator) scope, rows, columns);
-    }
-
-    static DoubleMatrix newDoubleMatrix(SegmentAllocator allocator, long rows, long columns) {
+    public static DoubleMatrix newDoubleMatrix(SegmentAllocator allocator, long rows, long columns) {
         // Allocate the memory for the matrix elements
         MemorySegment buffer = allocator.allocate(MemoryLayout.sequenceLayout(rows * columns, ValueLayout.JAVA_DOUBLE));
         return newDoubleMatrix(allocator, rows, columns, buffer);
     }
 
-    static DoubleMatrix newDoubleMatrix(SegmentAllocator allocator, long rows, long columns, MemorySegment buffer) {
+    public static DoubleMatrix newDoubleMatrix(long rows, long columns, MemorySegment buffer) {
+        return newDoubleMatrix(SegmentAllocator.nativeAllocator(SegmentScope.auto()), rows, columns, buffer);
+    }
+
+    public static DoubleMatrix newDoubleMatrix(SegmentAllocator allocator, long rows, long columns, MemorySegment buffer) {
         MemorySegment obj = newObj_t(allocator, rows, columns, buffer);
         return new DoubleMatrix(allocator, obj, buffer);
     }

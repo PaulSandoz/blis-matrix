@@ -25,8 +25,8 @@ package oracle.blis.matrix;
 
 import oracle.blis.matrix.binding.obj_t;
 
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 
 import static oracle.blis.matrix.binding.blis_h.*;
 
@@ -44,14 +44,14 @@ lldb -- \
  */
 public class TestNativeDebug {
     public static void main(String[] args) {
-        try (MemorySession s = MemorySession.openConfined()) {
+        try (Arena sa = Arena.openConfined()) {
             /* num_t  */ int dt;
             /* dim_t  */ long m, n, k;
             /* inc_t  */ long rs, cs;
 
-            /* obj_t* */ MemorySegment a = obj_t.allocate(s);
-            /* obj_t* */ MemorySegment b = obj_t.allocate(s);
-            /* obj_t* */ MemorySegment c = obj_t.allocate(s);
+            /* obj_t* */ MemorySegment a = obj_t.allocate(sa);
+            /* obj_t* */ MemorySegment b = obj_t.allocate(sa);
+            /* obj_t* */ MemorySegment c = obj_t.allocate(sa);
             /* obj_t* */ MemorySegment alpha;
             /* obj_t* */ MemorySegment beta;
 
@@ -72,24 +72,24 @@ public class TestNativeDebug {
             bli_setm(BLIS_ONE$SEGMENT(), b);
             bli_setm(BLIS_ZERO$SEGMENT(), c);
 
-            bli_printm(s.allocateUtf8String("a: randomized"), a,
-                    s.allocateUtf8String("%5.2f"), s.allocateUtf8String(""));
-            bli_printm(s.allocateUtf8String("b: set to 1.0"), b,
-                    s.allocateUtf8String("%5.2f"), s.allocateUtf8String(""));
-            bli_printm(s.allocateUtf8String("c: initial value"), c,
-                    s.allocateUtf8String("%5.2f"), s.allocateUtf8String(""));
+            bli_printm(sa.allocateUtf8String("a: randomized"), a,
+                    sa.allocateUtf8String("%5.2f"), sa.allocateUtf8String(""));
+            bli_printm(sa.allocateUtf8String("b: set to 1.0"), b,
+                    sa.allocateUtf8String("%5.2f"), sa.allocateUtf8String(""));
+            bli_printm(sa.allocateUtf8String("c: initial value"), c,
+                    sa.allocateUtf8String("%5.2f"), sa.allocateUtf8String(""));
 
             // c := beta * c + alpha * a * b, where 'a', 'b', and 'c' are general.
             System.out.printf("alpha=%#x, a=%#x,  b=%#x, beta=%#x, c=%#x\n",
-                    alpha.address().toRawLongValue(),
-                    a.address().toRawLongValue(),
-                    b.address().toRawLongValue(),
-                    beta.address().toRawLongValue(),
-                    c.address().toRawLongValue());
+                    alpha.address(),
+                    a.address(),
+                    b.address(),
+                    beta.address(),
+                    c.address());
             bli_gemm(alpha, a, b, beta, c);
 
-            bli_printm(s.allocateUtf8String("c: after gemm"), c,
-                    s.allocateUtf8String("%5.2f"), s.allocateUtf8String(""));
+            bli_printm(sa.allocateUtf8String("c: after gemm"), c,
+                    sa.allocateUtf8String("%5.2f"), sa.allocateUtf8String(""));
 
             // Free the objects.
             bli_obj_free(a);
