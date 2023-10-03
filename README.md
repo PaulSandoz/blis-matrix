@@ -52,24 +52,24 @@ Set the environment variable `BLIS_HOME` to point to the local BLIS respository.
 Set the environment variable `BLIS_ARCH` to be the target architecture. There by 
 `${BLIS_HOME}/include/${BLIS_ARCH}/blis.h` will be the path to the `blis.h` header file. 
 
-### Download JDK 20 
+### Download JDK 21
 
-The Oracle builds of JDK 20 can be downloaded here:
+The Oracle builds of JDK 21 can be downloaded here:
 
     https://www.oracle.com/java/technologies/downloads/
 
-Alternatively the OpenJDK build of JDK 20 can be downloaded here:
+Alternatively the OpenJDK build of JDK 21 can be downloaded here:
 
-    https://jdk.java.net/20/
+    https://jdk.java.net/21/
 
 ### Download and unpack the Panama tool jextract
 
-`jextract` can be downloaded from here:
+`jextract` for JDK 21 can be downloaded from here:
 
     https://jdk.java.net/jextract/
 
 Ensure that the jextract `bin` directory is added to the executable path, but be 
-careful to ensure the executable path of JDK 20 takes precedence.
+careful to ensure the executable path of JDK 21 takes precedence.
 
 ### Generate Java binding to the BLIS native library
 
