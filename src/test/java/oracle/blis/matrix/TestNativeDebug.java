@@ -44,7 +44,7 @@ lldb -- \
  */
 public class TestNativeDebug {
     public static void main(String[] args) {
-        try (Arena sa = Arena.openConfined()) {
+        try (Arena sa = Arena.ofConfined()) {
             /* num_t  */ int dt;
             /* dim_t  */ long m, n, k;
             /* inc_t  */ long rs, cs;

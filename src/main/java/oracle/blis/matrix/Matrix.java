@@ -30,7 +30,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SegmentAllocator;
-import java.lang.foreign.SegmentScope;
 import java.lang.foreign.ValueLayout;
 
 public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicConstant {
@@ -131,10 +130,10 @@ public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicC
     }
 
     public void print(String m) {
-        try (var sa = Arena.openConfined()) {
-            var message = sa.allocateUtf8String(m);
-            var emptyString = sa.allocateUtf8String("");
-            var format = sa.allocateUtf8String("%5.2f");
+        try (var a = Arena.ofConfined()) {
+            var message = a.allocateUtf8String(m);
+            var emptyString = a.allocateUtf8String("");
+            var format = a.allocateUtf8String("%5.2f");
             blis_h.bli_printm(message, obj, format, emptyString);
         }
     }
@@ -415,7 +414,7 @@ public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicC
     }
 
     public static DoubleMatrix newDoubleMatrix(long rows, long columns) {
-        return newDoubleMatrix(SegmentAllocator.nativeAllocator(SegmentScope.auto()), rows, columns);
+        return newDoubleMatrix(Arena.ofAuto(), rows, columns);
     }
 
     public static DoubleMatrix newDoubleMatrix(SegmentAllocator allocator, long rows, long columns) {
@@ -425,7 +424,7 @@ public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicC
     }
 
     public static DoubleMatrix newDoubleMatrix(long rows, long columns, MemorySegment buffer) {
-        return newDoubleMatrix(SegmentAllocator.nativeAllocator(SegmentScope.auto()), rows, columns, buffer);
+        return newDoubleMatrix(Arena.ofAuto(), rows, columns, buffer);
     }
 
     public static DoubleMatrix newDoubleMatrix(SegmentAllocator allocator, long rows, long columns, MemorySegment buffer) {

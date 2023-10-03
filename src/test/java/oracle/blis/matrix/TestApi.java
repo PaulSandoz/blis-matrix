@@ -34,7 +34,7 @@ import static oracle.blis.matrix.binding.blis_h.*;
 public class TestApi {
     @Test
     public void testUsingBinding() {
-        try (Arena sa = Arena.openConfined()) {
+        try (Arena sa = Arena.ofConfined()) {
             /* num_t  */ int dt;
             /* dim_t  */ long m, n, k;
             /* inc_t  */ long rs, cs;
@@ -86,7 +86,7 @@ public class TestApi {
 
     @Test
     public void testUsingMatrix() {
-        try (Arena sa = Arena.openConfined()) {
+        try (Arena sa = Arena.ofConfined()) {
             /* dim_t  */ long m, n, k;
 
             // Create some matrix operands to work with.
