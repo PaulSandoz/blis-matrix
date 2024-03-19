@@ -23,13 +23,13 @@
 
 package oracle.blis.matrix;
 
-import oracle.blis.matrix.binding.obj_t;
+import oracle.blis.binding.obj_t;
 import org.junit.Test;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 
-import static oracle.blis.matrix.binding.blis_h.*;
+import static oracle.blis.binding.blis_h.*;
 
 public class TestApi {
     @Test
@@ -54,26 +54,26 @@ public class TestApi {
             bli_obj_create(dt, k, n, rs, cs, b);
 
             // Set the scalars to use.
-            alpha = BLIS_ONE$SEGMENT();
-            beta = BLIS_ONE$SEGMENT();
+            alpha = BLIS_ONE();
+            beta = BLIS_ONE();
 
             // Initialize the matrix operands.
             bli_randm(a);
-            bli_setm(BLIS_ONE$SEGMENT(), b);
-            bli_setm(BLIS_ZERO$SEGMENT(), c);
+            bli_setm(BLIS_ONE(), b);
+            bli_setm(BLIS_ZERO(), c);
 
-            bli_printm(sa.allocateUtf8String("a: randomized"), a,
-                    sa.allocateUtf8String("%5.2f"), sa.allocateUtf8String(""));
-            bli_printm(sa.allocateUtf8String("b: set to 1.0"), b,
-                    sa.allocateUtf8String("%5.2f"), sa.allocateUtf8String(""));
-            bli_printm(sa.allocateUtf8String("c: initial value"), c,
-                    sa.allocateUtf8String("%5.2f"), sa.allocateUtf8String(""));
+            bli_printm(sa.allocateFrom("a: randomized"), a,
+                    sa.allocateFrom("%5.2f"), sa.allocateFrom(""));
+            bli_printm(sa.allocateFrom("b: set to 1.0"), b,
+                    sa.allocateFrom("%5.2f"), sa.allocateFrom(""));
+            bli_printm(sa.allocateFrom("c: initial value"), c,
+                    sa.allocateFrom("%5.2f"), sa.allocateFrom(""));
 
             // c := beta * c + alpha * a * b, where 'a', 'b', and 'c' are general.
             bli_gemm(alpha, a, b, beta, c);
 
-            bli_printm(sa.allocateUtf8String("c: after gemm"), c,
-                    sa.allocateUtf8String("%5.2f"), sa.allocateUtf8String(""));
+            bli_printm(sa.allocateFrom("c: after gemm"), c,
+                    sa.allocateFrom("%5.2f"), sa.allocateFrom(""));
 
             // Free the objects.
             bli_obj_free(a);

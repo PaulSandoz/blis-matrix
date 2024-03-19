@@ -23,7 +23,7 @@
 
 package oracle.blis.matrix;
 
-import oracle.blis.matrix.binding.blis_h;
+import oracle.blis.binding.blis_h;
 
 import java.lang.annotation.Target;
 

@@ -15,11 +15,7 @@ blisHeader=${blisHome}/include/${blisArch}/blis.h
 
 echo Generating Panama blis source bindings for $blisHeader.
 
-groupId=oracle.blis.matrix
-artifactId=blis-binding
-version=1.0-SNAPSHOT
-
-packageName=${groupId}.binding
+packageName=oracle.blis.binding
 
 mkdir -p target
 
@@ -28,23 +24,14 @@ jextract \
    --dump-includes target/blis.includes.conf \
   $blisHeader
 
-grep blis.h target/blis.includes.conf > target/blis.includes.filtered.conf
+grep -e blis.h -e pthread target/blis.includes.conf > target/blis.includes.filtered.conf
 
 jextract \
    -I /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include \
-   --output target/blis/sources \
-   -l blis -t ${packageName} \
-   --source \
+   --output target/generated-sources/blis \
+   -l blis \
+   --use-system-load-library \
+   -t ${packageName} \
    @target/blis.includes.filtered.conf \
   $blisHeader
-
-blisJarFile=${artifactId}-${version}-sources.jar
-jar --create --file target/${blisJarFile} -C target/blis/sources/ .
-
-mvn install:install-file -Dfile=target/${blisJarFile} \
-  -DgroupId=${groupId} \
-  -DartifactId=${artifactId} \
-  -Dversion=${version} \
-  -Dpackaging=jar \
-  -Dclassifier=sources
 

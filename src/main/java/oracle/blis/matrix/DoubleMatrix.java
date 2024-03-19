@@ -23,8 +23,8 @@
 
 package oracle.blis.matrix;
 
-import oracle.blis.matrix.binding.blis_h;
-import oracle.blis.matrix.binding.obj_t;
+import oracle.blis.binding.blis_h;
+import oracle.blis.binding.obj_t;
 
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SegmentAllocator;

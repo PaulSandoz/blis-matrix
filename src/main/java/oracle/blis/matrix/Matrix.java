@@ -23,8 +23,8 @@
 
 package oracle.blis.matrix;
 
-import oracle.blis.matrix.binding.blis_h;
-import oracle.blis.matrix.binding.obj_t;
+import oracle.blis.binding.blis_h;
+import oracle.blis.binding.obj_t;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
@@ -55,14 +55,14 @@ public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicC
         this.allocator = allocator;
         this.obj = obj;
         this.buffer = buffer;
-        MemorySegment dim = obj_t.dim$slice(obj);
+        MemorySegment dim = obj_t.dim(obj);
         this.rows = dim.getAtIndex(ValueLayout.JAVA_LONG, 0);
         this.columns = dim.getAtIndex(ValueLayout.JAVA_LONG, 1);
-        MemorySegment off = obj_t.off$slice(obj);
+        MemorySegment off = obj_t.off(obj);
         this.rowOffset = off.getAtIndex(ValueLayout.JAVA_LONG, 0);
         this.columnOffset = off.getAtIndex(ValueLayout.JAVA_LONG, 1);
-        this.rowStride = obj_t.rs$get(obj);
-        this.columnStride = obj_t.cs$get(obj);
+        this.rowStride = obj_t.rs(obj);
+        this.columnStride = obj_t.cs(obj);
     }
 
     public String toDimString() {
@@ -131,9 +131,9 @@ public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicC
 
     public void print(String m) {
         try (var a = Arena.ofConfined()) {
-            var message = a.allocateUtf8String(m);
-            var emptyString = a.allocateUtf8String("");
-            var format = a.allocateUtf8String("%5.2f");
+            var message = a.allocateFrom(m);
+            var emptyString = a.allocateFrom("");
+            var format = a.allocateFrom("%5.2f");
             blis_h.bli_printm(message, obj, format, emptyString);
         }
     }
@@ -273,81 +273,81 @@ public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicC
     }
 
     public Trans conjTrans() {
-        int info = obj_t.info$get(obj);
+        int info = obj_t.info(obj);
         return Trans.from(info & blis_h.BLIS_CONJTRANS_BITS());
     }
 
     public Matrix<T> withConjTrans(Trans t) {
-        int i = obj_t.info$get(obj);
+        int i = obj_t.info(obj);
         i = (i & ~blis_h.BLIS_CONJTRANS_BITS()) | t.v;
 
         Matrix<T> that = subMatrix(0, 0, rows(), columns());
-        obj_t.info$set(that.obj, i);
+        obj_t.info(that.obj, i);
         return that;
     }
 
     public Trans transOnly() {
-        int i = obj_t.info$get(obj);
+        int i = obj_t.info(obj);
         return Trans.from(i & blis_h.BLIS_TRANS_BIT());
     }
 
     public Matrix<T> withTransOnly(Trans t) {
-        int i = obj_t.info$get(obj);
+        int i = obj_t.info(obj);
         i = (i & ~blis_h.BLIS_TRANS_BIT()) | t.v;
 
         Matrix<T> that = subMatrix(0, 0, rows(), columns());
-        obj_t.info$set(that.obj, i);
+        obj_t.info(that.obj, i);
         return that;
     }
 
     public Structure struc() {
-        int info = obj_t.info$get(obj);
+        int info = obj_t.info(obj);
         return Structure.from(info & blis_h.BLIS_STRUC_BITS());
     }
 
     public Matrix<T> withStruc(Structure t) {
-        int i = obj_t.info$get(obj);
+        int i = obj_t.info(obj);
         i = (i & ~blis_h.BLIS_STRUC_BITS()) | t.v;
 
         Matrix<T> that = subMatrix(0, 0, rows(), columns());
-        obj_t.info$set(that.obj, i);
+        obj_t.info(that.obj, i);
         return that;
     }
 
     public Uplo uplo() {
-        int info = obj_t.info$get(obj);
+        int info = obj_t.info(obj);
         return Uplo.from(info & blis_h.BLIS_UPLO_BITS());
     }
 
     public Matrix<T> withUplo(Uplo t) {
-        int i = obj_t.info$get(obj);
+        int i = obj_t.info(obj);
         i = (i & ~blis_h.BLIS_UPLO_BITS()) | t.v;
 
         Matrix<T> that = subMatrix(0, 0, rows(), columns());
-        obj_t.info$set(that.obj, i);
+        obj_t.info(that.obj, i);
         return that;
     }
 
     public Diag diag() {
-        int i = obj_t.info$get(obj);
+        int i = obj_t.info(obj);
         return Diag.from(i & blis_h.BLIS_UNIT_DIAG_BIT());
     }
 
     public Matrix<T> withDiag(Diag d) {
-        int i = obj_t.info$get(obj);
+        int i = obj_t.info(obj);
         i = (i & ~blis_h.BLIS_UNIT_DIAG_BIT()) | d.v;
 
         Matrix<T> that = subMatrix(0, 0, rows(), columns());
-        obj_t.info$set(that.obj, i);
+        obj_t.info(that.obj, i);
         return that;
     }
 
     public long diagOffset() {
-        return obj_t.diag_off$get(obj);
+        return obj_t.diag_off(obj);
     }
 
     public void setDiagOffset(long o) {
-        obj_t.diag_off$set(obj, o);
+        obj_t.diag_off(obj, o);
     }
 
     // Specializations
@@ -396,9 +396,9 @@ public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicC
     }
 
     private static final class Constants {
-        static final Matrix<?> ZERO = new PolymorphicConstant(blis_h.BLIS_ZERO$SEGMENT());
-        static final Matrix<?> ONE = new PolymorphicConstant(blis_h.BLIS_ONE$SEGMENT());
-        static final Matrix<?> TWO = new PolymorphicConstant(blis_h.BLIS_TWO$SEGMENT());
+        static final Matrix<?> ZERO = new PolymorphicConstant(blis_h.BLIS_ZERO());
+        static final Matrix<?> ONE = new PolymorphicConstant(blis_h.BLIS_ONE());
+        static final Matrix<?> TWO = new PolymorphicConstant(blis_h.BLIS_TWO());
     }
 
     public static Matrix<?> zero() {
