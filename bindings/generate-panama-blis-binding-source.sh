@@ -20,18 +20,25 @@ packageName=oracle.blis.binding
 mkdir -p target
 
 jextract \
-   -I /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include \
-   --dump-includes target/blis.includes.conf \
+  --dump-includes target/blis.includes.conf \
   $blisHeader
 
-grep -e blis.h -e pthread target/blis.includes.conf > target/blis.includes.filtered.conf
+# Filter jextract directives to reduce what is generated
+grep \
+  -e "--include-constant BLIS_" \
+  -e "--include-var BLIS_" \
+  -e "--include-function bli_" \
+  -e " obj_" \
+  -e " dcomplex" \
+  target/blis.includes.conf > target/blis.includes.filtered.conf
+grep -Ev "thread|BLIS_SINGLE_COMM" \
+  target/blis.includes.filtered.conf > target/blis.includes.filtered.conf2
 
 jextract \
-   -I /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include \
-   --output target/generated-sources/blis \
-   -l blis \
-   --use-system-load-library \
-   -t ${packageName} \
-   @target/blis.includes.filtered.conf \
+  --output target/generated-sources/blis \
+  -l blis \
+  --use-system-load-library \
+  -t ${packageName} \
+  @target/blis.includes.filtered.conf2 \
   $blisHeader
 

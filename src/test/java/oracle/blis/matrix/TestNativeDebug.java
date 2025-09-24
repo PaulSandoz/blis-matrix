@@ -34,16 +34,15 @@ import static oracle.blis.binding.blis_h.*;
 On the Mac:
 
 lldb -- \
-    ~/Projects/jdk/jdk19/build/macosx-x86_64-server-release/images/jdk/bin/java \
-    -cp target/classes:target/test-classes:bindings/target/blis/classes \
-    -Djava.library.path=/Users/sandoz/Projects/jdk/blis/blis-flame/lib/haswell \
-    --enable-native-access=ALL-UNNAMED \
-    --enable-preview \
-    -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005 \
-    oracle.blis.matrix.TestNativeDebug
+    ~/Projects/jdk/jdk/build/macosx-aarch64-server-release/images/jdk/bin/java \
+        -cp target/classes:target/test-classes:bindings/target/classes \
+        -Djava.library.path=/Users/sandoz/Projects/jdk/blis/blis-flame/lib/firestorm \
+        --enable-native-access=ALL-UNNAMED \
+        -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=\*:5005 \
+        oracle.blis.matrix.TestNativeDebug
  */
 public class TestNativeDebug {
-    public static void main(String[] args) {
+    void main() {
         try (Arena sa = Arena.ofConfined()) {
             /* num_t  */ int dt;
             /* dim_t  */ long m, n, k;

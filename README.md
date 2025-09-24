@@ -50,30 +50,34 @@ On a machine with an Intel Haswell chip the blis header file will be located at
 `include/haswell/blis.h` and the libraries will be located under `lib/haswell/`,
 where `haswell` is the target architecture.
 
+On a Mac with an ARM chip the blis header file will be located at
+`include/firestorm/blis.h` and the libraries will be located under
+`lib/firestorm/`, where `firestorm` is the target architecture.
+
 Set the environment variable `BLIS_HOME` to point to the local BLIS repository.
 
 Set the environment variable `BLIS_ARCH` to be the target architecture. There by
 `${BLIS_HOME}/include/${BLIS_ARCH}/blis.h` will be the path to the `blis.h`
 header file.
 
-### Download JDK 22
+### Download JDK 25
 
-The Oracle builds of JDK 22 can be downloaded here:
+The Oracle builds of JDK 25 can be downloaded here:
 
     https://www.oracle.com/java/technologies/downloads/
 
-Alternatively the OpenJDK build of JDK 22 can be downloaded here:
+Alternatively the OpenJDK build of JDK 25 can be downloaded here:
 
-    https://jdk.java.net/22/
+    https://jdk.java.net/25/
 
 ### Download and unpack the Panama tool jextract
 
-`jextract` for JDK 22 can be downloaded from here:
+`jextract` can be downloaded from here:
 
     https://jdk.java.net/jextract/
 
 Ensure that the jextract `bin` directory is added to the executable path, but be
-careful to ensure the executable path of JDK 22 takes precedence.
+careful to ensure the executable path of JDK 25 takes precedence.
 
 ### Generate Java source binding to the BLIS native library
 

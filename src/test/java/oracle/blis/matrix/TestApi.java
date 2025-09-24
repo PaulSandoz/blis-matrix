@@ -24,7 +24,7 @@
 package oracle.blis.matrix;
 
 import oracle.blis.binding.obj_t;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
@@ -34,14 +34,14 @@ import static oracle.blis.binding.blis_h.*;
 public class TestApi {
     @Test
     public void testUsingBinding() {
-        try (Arena sa = Arena.ofConfined()) {
+        try (Arena arena = Arena.ofConfined()) {
             /* num_t  */ int dt;
             /* dim_t  */ long m, n, k;
             /* inc_t  */ long rs, cs;
 
-            /* obj_t* */ MemorySegment a = obj_t.allocate(sa);
-            /* obj_t* */ MemorySegment b = obj_t.allocate(sa);
-            /* obj_t* */ MemorySegment c = obj_t.allocate(sa);
+            /* obj_t* */ MemorySegment a = obj_t.allocate(arena);
+            /* obj_t* */ MemorySegment b = obj_t.allocate(arena);
+            /* obj_t* */ MemorySegment c = obj_t.allocate(arena);
             /* obj_t* */ MemorySegment alpha;
             /* obj_t* */ MemorySegment beta;
 
@@ -62,18 +62,18 @@ public class TestApi {
             bli_setm(BLIS_ONE(), b);
             bli_setm(BLIS_ZERO(), c);
 
-            bli_printm(sa.allocateFrom("a: randomized"), a,
-                    sa.allocateFrom("%5.2f"), sa.allocateFrom(""));
-            bli_printm(sa.allocateFrom("b: set to 1.0"), b,
-                    sa.allocateFrom("%5.2f"), sa.allocateFrom(""));
-            bli_printm(sa.allocateFrom("c: initial value"), c,
-                    sa.allocateFrom("%5.2f"), sa.allocateFrom(""));
+            bli_printm(arena.allocateFrom("a: randomized"), a,
+                    arena.allocateFrom("%5.2f"), arena.allocateFrom(""));
+            bli_printm(arena.allocateFrom("b: set to 1.0"), b,
+                    arena.allocateFrom("%5.2f"), arena.allocateFrom(""));
+            bli_printm(arena.allocateFrom("c: initial value"), c,
+                    arena.allocateFrom("%5.2f"), arena.allocateFrom(""));
 
             // c := beta * c + alpha * a * b, where 'a', 'b', and 'c' are general.
             bli_gemm(alpha, a, b, beta, c);
 
-            bli_printm(sa.allocateFrom("c: after gemm"), c,
-                    sa.allocateFrom("%5.2f"), sa.allocateFrom(""));
+            bli_printm(arena.allocateFrom("c: after gemm"), c,
+                    arena.allocateFrom("%5.2f"), arena.allocateFrom(""));
 
             // Free the objects.
             bli_obj_free(a);
@@ -86,14 +86,14 @@ public class TestApi {
 
     @Test
     public void testUsingMatrix() {
-        try (Arena sa = Arena.ofConfined()) {
+        try (Arena arena = Arena.ofConfined()) {
             /* dim_t  */ long m, n, k;
 
             // Create some matrix operands to work with.
             m = 4; n = 5; k = 3;
-            DoubleMatrix c = Matrix.newDoubleMatrix(sa, m, n);
-            DoubleMatrix a = Matrix.newDoubleMatrix(sa, m, k);
-            DoubleMatrix b = Matrix.newDoubleMatrix(sa, k, n);
+            DoubleMatrix c = Matrix.newDoubleMatrix(arena, m, n);
+            DoubleMatrix a = Matrix.newDoubleMatrix(arena, m, k);
+            DoubleMatrix b = Matrix.newDoubleMatrix(arena, k, n);
 
             // Set the scalars to use.
             Matrix<?> alpha = Matrix.one();
