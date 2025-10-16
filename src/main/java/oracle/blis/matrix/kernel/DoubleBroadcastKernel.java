@@ -21,7 +21,9 @@
  * questions.
  */
 
-package oracle.blis.matrix;
+package oracle.blis.matrix.kernel;
+
+import oracle.blis.matrix.f.DoubleTernaryOperator;
 
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
@@ -59,7 +61,7 @@ public interface DoubleBroadcastKernel {
         // @@@ parallel unaryBroadcast
     }
 
-    interface BinaryBinaryBroadcastKernel extends DoubleBinaryOperator {
+    interface BinaryBroadcastKernel extends DoubleBinaryOperator {
         default void binaryBroadcastScalar(MemorySegment a, double b, MemorySegment r,
                                            long offset, long length) {
             for (long i = 0; i < length; i++) {
@@ -88,14 +90,14 @@ public interface DoubleBroadcastKernel {
         }
     }
 
-    abstract class ParallelBinaryBinaryBroadcastKernel implements BinaryBinaryBroadcastKernel {
+    abstract class ParallelBinaryBroadcastKernel implements BinaryBroadcastKernel {
         final boolean parallel;
 
-        public ParallelBinaryBinaryBroadcastKernel() {
+        public ParallelBinaryBroadcastKernel() {
             this(false);
         }
 
-        public ParallelBinaryBinaryBroadcastKernel(boolean parallel) {
+        public ParallelBinaryBroadcastKernel(boolean parallel) {
             this.parallel = parallel;
         }
 
@@ -107,7 +109,7 @@ public interface DoubleBroadcastKernel {
                     binaryBroadcastScalar(a, bE, r, j * aStride, aStride);
                 });
             } else {
-                BinaryBinaryBroadcastKernel.super.binaryBroadcastVector(a, b, r, aStride, bLength);
+                BinaryBroadcastKernel.super.binaryBroadcastVector(a, b, r, aStride, bLength);
             }
         }
 

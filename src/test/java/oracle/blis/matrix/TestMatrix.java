@@ -23,9 +23,15 @@
 
 package oracle.blis.matrix;
 
+import oracle.blis.matrix.kernel.DoubleBroadcastKernel;
 import org.junit.jupiter.api.Test;
 
+import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestMatrix {
 
@@ -149,6 +155,76 @@ public class TestMatrix {
         );
 
         return std;
+    }
+
+    @Test
+    public void testBinaryBroadcastRowVector() {
+        DoubleMatrix a = Matrix.newDoubleMatrix(5, 10);
+        a.randm();
+
+        DoubleMatrix b = Matrix.newDoubleMatrix(1, 10);
+        a.randm();
+
+        AtomicBoolean invoked = new AtomicBoolean();
+        class Kernel implements DoubleBroadcastKernel.BinaryBroadcastKernel {
+            @Override
+            public double applyAsDouble(double a, double b) {
+                return a * b;
+            }
+
+            @Override
+            public void binaryBroadcastVector(MemorySegment a, MemorySegment b, MemorySegment r, long aStride, long bLength) {
+                invoked.set(true);
+                DoubleBroadcastKernel.BinaryBroadcastKernel.super.binaryBroadcastVector(a, b, r, aStride, bLength);
+            }
+        }
+
+
+        DoubleMatrix rK = Matrix.newDoubleMatrix(5, 10);
+        a.elementwise(b, rK, new Kernel());
+        assertTrue(invoked.get());
+
+        DoubleMatrix r = Matrix.newDoubleMatrix(5, 10);
+        a.elementwise(b, r, (aE, bE) -> aE * bE);
+
+        assertTrue(r.equals(rK, 1e-20));
+    }
+
+    // Does not work for column major layout
+
+
+
+    @Test
+    public void testBinaryBroadcastColumnVector() {
+        DoubleMatrix a = Matrix.newDoubleMatrix(5, 10);
+        a.randm();
+
+        DoubleMatrix b = Matrix.newDoubleMatrix(5, 1);
+        a.randm();
+
+        AtomicBoolean invoked = new AtomicBoolean();
+        class Kernel implements DoubleBroadcastKernel.BinaryBroadcastKernel {
+            @Override
+            public double applyAsDouble(double a, double b) {
+                return a * b;
+            }
+
+            @Override
+            public void binaryBroadcastVector(MemorySegment a, MemorySegment b, MemorySegment r, long aStride, long bLength) {
+                invoked.set(true);
+                DoubleBroadcastKernel.BinaryBroadcastKernel.super.binaryBroadcastVector(a, b, r, aStride, bLength);
+            }
+        }
+
+
+        DoubleMatrix rK = Matrix.newDoubleMatrix(5, 10);
+        a.elementwise(b, rK, new Kernel());
+        assertFalse(invoked.get());
+
+        DoubleMatrix r = Matrix.newDoubleMatrix(5, 10);
+        a.elementwise(b, r, (aE, bE) -> aE * bE);
+
+        assertTrue(r.equals(rK, 1e-20));
     }
 }
 

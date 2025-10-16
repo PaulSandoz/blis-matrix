@@ -23,16 +23,14 @@
 
 package oracle.blis.matrix;
 
+import jdk.incubator.vector.FloatVector;
 import oracle.blis.binding.blis_h;
 import oracle.blis.binding.obj_t;
 
-import java.lang.foreign.Arena;
-import java.lang.foreign.MemoryLayout;
-import java.lang.foreign.MemorySegment;
-import java.lang.foreign.SegmentAllocator;
-import java.lang.foreign.ValueLayout;
+import java.lang.foreign.*;
 
-public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicConstant {
+public abstract sealed class Matrix<T> permits
+        DoubleMatrix, FloatMatrix, Float16Matrix, Matrix.PolymorphicConstant {
     // Allocator to allocate view obj_t
     final SegmentAllocator allocator;
 
@@ -113,7 +111,7 @@ public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicC
 
     public abstract void copyInto(Matrix<T> dest);
 
-    public abstract void copyRowInto(int srcRow, Matrix<Double> r, int dstRow);
+    public abstract void copyRowInto(int srcRow, Matrix<T> r, int dstRow);
 
     public abstract void transpose(Matrix<T> b);
 
@@ -368,7 +366,7 @@ public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicC
         }
 
         @Override
-        public void copyRowInto(int srcRow, Matrix<Double> r, int dstRow) {
+        public void copyRowInto(int srcRow, Matrix<Object> r, int dstRow) {
             throw new UnsupportedOperationException();
         }
 
@@ -428,16 +426,58 @@ public abstract sealed class Matrix<T> permits DoubleMatrix, Matrix.PolymorphicC
     }
 
     public static DoubleMatrix newDoubleMatrix(SegmentAllocator allocator, long rows, long columns, MemorySegment buffer) {
-        MemorySegment obj = newObj_t(allocator, rows, columns, buffer);
+        MemorySegment obj = newObj_t(allocator, rows, columns, buffer, blis_h.BLIS_DOUBLE());
         return new DoubleMatrix(allocator, obj, buffer);
     }
 
-    static MemorySegment newObj_t(SegmentAllocator allocator, long rows, long columns, MemorySegment buffer) {
+    public static FloatMatrix newFloatMatrix(long rows, long columns) {
+        return newFloatMatrix(Arena.ofAuto(), rows, columns);
+    }
+
+    public static FloatMatrix newFloatMatrix(SegmentAllocator allocator, long rows, long columns) {
+        // Allocate the memory for the matrix elements
+        // Align with preferred vector size
+        SequenceLayout bufferLayout = MemoryLayout.sequenceLayout(rows * columns, ValueLayout.JAVA_FLOAT)
+                .withByteAlignment(FloatVector.SPECIES_PREFERRED.vectorByteSize());
+        MemorySegment buffer = allocator.allocate(bufferLayout);
+        return newFloatMatrix(allocator, rows, columns, buffer);
+    }
+
+    public static FloatMatrix newFloatMatrix(long rows, long columns, MemorySegment buffer) {
+        return newFloatMatrix(Arena.ofAuto(), rows, columns, buffer);
+    }
+
+    public static FloatMatrix newFloatMatrix(SegmentAllocator allocator, long rows, long columns, MemorySegment buffer) {
+        MemorySegment obj = newObj_t(allocator, rows, columns, buffer, blis_h.BLIS_FLOAT());
+        return new FloatMatrix(allocator, obj, buffer);
+    }
+
+    public static Float16Matrix newFloat16Matrix(long rows, long columns) {
+        return newFloat16Matrix(Arena.ofAuto(), rows, columns);
+    }
+
+    public static Float16Matrix newFloat16Matrix(SegmentAllocator allocator, long rows, long columns) {
+        // Allocate the memory for the matrix elements
+        MemorySegment buffer = allocator.allocate(MemoryLayout.sequenceLayout(rows * columns, ValueLayout.JAVA_SHORT));
+        return newFloat16Matrix(allocator, rows, columns, buffer);
+    }
+
+    public static Float16Matrix newFloat16Matrix(long rows, long columns, MemorySegment buffer) {
+        return newFloat16Matrix(Arena.ofAuto(), rows, columns, buffer);
+    }
+
+    public static Float16Matrix newFloat16Matrix(SegmentAllocator allocator, long rows, long columns, MemorySegment buffer) {
+        // @@@ Operations on the buffer will crash, since BLIS does not currently support Float16
+        MemorySegment obj = newObj_t(allocator, rows, columns, buffer, blis_h.BLIS_FLOAT());
+        return new Float16Matrix(allocator, obj, buffer);
+    }
+
+    static MemorySegment newObj_t(SegmentAllocator allocator, long rows, long columns, MemorySegment buffer, int type) {
         // Allocate the obj_t struct and attach the buffer
         MemorySegment obj = obj_t.allocate(allocator);
         blis_h.bli_obj_create_with_attached_buffer(
                 // Element type
-                blis_h.BLIS_DOUBLE(),
+                type,
                 // Shape
                 rows, columns,
                 // Pointer to elements

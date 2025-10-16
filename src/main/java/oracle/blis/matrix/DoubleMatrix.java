@@ -25,6 +25,8 @@ package oracle.blis.matrix;
 
 import oracle.blis.binding.blis_h;
 import oracle.blis.binding.obj_t;
+import oracle.blis.matrix.f.DoubleTernaryOperator;
+import oracle.blis.matrix.kernel.DoubleBroadcastKernel;
 
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SegmentAllocator;
@@ -138,7 +140,7 @@ public final class DoubleMatrix extends Matrix<Double> {
         assert a.rows == b.rows && a.columns == b.columns;
 
         if (a.isZeroOffset() && b.isZeroOffset() && r.isZeroOffset() &&
-                o instanceof DoubleBroadcastKernel.BinaryBinaryBroadcastKernel k) {
+                o instanceof DoubleBroadcastKernel.BinaryBroadcastKernel k) {
             k.binaryBroadcastMatrix(a.buffer, b.buffer, r.buffer, a.rows * a.columns);
         } else {
             for (long j = 0; j < a.columns; j++) {
@@ -167,7 +169,7 @@ public final class DoubleMatrix extends Matrix<Double> {
     private static void elementwiseWithScalar(DoubleMatrix a, double bE, DoubleMatrix r,
                                               DoubleBinaryOperator o) {
         if (a.isZeroOffset() && r.isZeroOffset() &&
-                o instanceof DoubleBroadcastKernel.BinaryBinaryBroadcastKernel k) {
+                o instanceof DoubleBroadcastKernel.BinaryBroadcastKernel k) {
             k.binaryBroadcastScalar(a.buffer, bE, r.buffer, 0, a.rows * a.columns);
         } else {
             for (long j = 0; j < a.columns; j++) {
@@ -199,7 +201,7 @@ public final class DoubleMatrix extends Matrix<Double> {
         if (a.isZeroOffset() && b.isZeroOffset() && r.isZeroOffset() &&
                 a.rowStride == 1 && r.rowStride == 1 &&
                 b.columnStride == 1 &&
-                o instanceof DoubleBroadcastKernel.BinaryBinaryBroadcastKernel k) {
+                o instanceof DoubleBroadcastKernel.BinaryBroadcastKernel k) {
             k.binaryBroadcastVector(a.buffer, b.buffer, r.buffer, a.columnStride, b.columns);
         } else {
             for (long j = 0; j < a.columns; j++) {
@@ -235,7 +237,7 @@ public final class DoubleMatrix extends Matrix<Double> {
         if (a.isZeroOffset() && b.isZeroOffset() && r.isZeroOffset() &&
                 a.columnStride == 1 && r.columnStride == 1 &&
                 b.rowStride == 1 &&
-                o instanceof DoubleBroadcastKernel.BinaryBinaryBroadcastKernel k) {
+                o instanceof DoubleBroadcastKernel.BinaryBroadcastKernel k) {
             assert a.rowStride == b.rows;
             k.binaryBroadcastVector(a.buffer, b.buffer, r.buffer, a.rowStride, b.rows);
         } else {

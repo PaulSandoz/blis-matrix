@@ -29,8 +29,7 @@ cc -I ${BLIS_HOME}/include/${BLIS_ARCH}/ \
 #include <stdio.h>
 #include "blis.h"
 
-int main( int argc, char** argv )
-{
+int main( int argc, char** argv ) {
 	num_t dt;
 	dim_t m, n, k;
 	inc_t rs, cs;
@@ -40,7 +39,6 @@ int main( int argc, char** argv )
 	obj_t c;
 	obj_t* alpha;
 	obj_t* beta;
-
 
 	// Create some matrix operands to work with.
 	dt = BLIS_DOUBLE;

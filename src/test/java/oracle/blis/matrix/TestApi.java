@@ -34,6 +34,7 @@ import static oracle.blis.binding.blis_h.*;
 public class TestApi {
     @Test
     public void testUsingBinding() {
+        // Confine allocation to current thread
         try (Arena arena = Arena.ofConfined()) {
             /* num_t  */ int dt;
             /* dim_t  */ long m, n, k;
@@ -44,7 +45,6 @@ public class TestApi {
             /* obj_t* */ MemorySegment c = obj_t.allocate(arena);
             /* obj_t* */ MemorySegment alpha;
             /* obj_t* */ MemorySegment beta;
-
 
             // Create some matrix operands to work with.
             dt = BLIS_DOUBLE();

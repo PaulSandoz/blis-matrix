@@ -21,10 +21,10 @@
  * questions.
  */
 
-package oracle.blis.matrix;
+package oracle.blis.matrix.f;
 
 @FunctionalInterface
 public
-interface DoubleTernaryOperator {
-    double applyAsDouble(double a, double b, double c);
+interface FloatTernaryOperator {
+    float applyAsFloat(float a, float b, float c);
 }
